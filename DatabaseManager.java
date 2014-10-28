@@ -123,15 +123,15 @@ public class DatabaseManager {
         }
         return false;
     }
-	/** 
+	/** Increments the internal db counter by one and opens the db if needed
 	*
 	*/
 	public void open(){
 		sqLiteOpenHelper.addConnection();
 		if (db==null||!db.isOpen()){
-            synchronized (lockObject){
-                db = sqLiteOpenHelper.getWritableDatabase();
-            }
-        } 
+	            synchronized (lockObject){
+	                db = sqLiteOpenHelper.getWritableDatabase();
+	            }
+		} 
 	}
 }
