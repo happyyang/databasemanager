@@ -6,6 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * This code hasn't been tested yet because I'm not on my machine with Android SDK installed right now. 
+ * I'll verify it's working very soon..
+ * 
  * If distributing: Keep my notes that are self-promoting. Keep or improve the other notes.4
  * If distributing (to programmers) in a way that the notes cannot be read, please include a readme file and provide
  * a link to http://androidsqlitelibrary.com
@@ -29,12 +32,14 @@ public class DatabaseManager {
 	/** A helper class to manage connection counting. 
 	* Your SQLiteOpenHelper class will do everything it normally would and will function as 
 	* Android documentations says. This subclass of your subclass just manages the connection counter4
+	* 
+	* This is inlined for copy-paste convenience. feel free to put it in a separate class though
 	*/
 	static private class DBSQLiteOpenHelper extends MySQLiteOpenHelper {
 		   private int counter;
 			private static final Object lockObject = new Object();
 		 
-			public JQLOpenHelper(Context context, String name, int version) {
+			public DBSQLiteOpenHelper(Context context, String name, int version) {
 				super(context, name, null, version);
 			}
 
@@ -58,7 +63,7 @@ public class DatabaseManager {
 			}
 	}
 
-    private static final ConcurrentHashMap<String,JQLOpenHelper> dbMap = new ConcurrentHashMap<String, DBSQLiteOpenHelper>();
+    private static final ConcurrentHashMap<String,DBSQLiteOpenHelper> dbMap = new ConcurrentHashMap<String, DBSQLiteOpenHelper>();
 
     private static final Object lockObject = new Object();
 
@@ -76,7 +81,7 @@ public class DatabaseManager {
      * @param name The database name. This may be anything you like. Adding a file extension is not required and any file extension you would like to use is fine.
      * @param version the database version.
      */
-    public JQLDatabase(Context context, String name, int version) {
+    public DatabaseManager(Context context, String name, int version) {
         String dbPath = context.getApplicationContext().getDatabasePath(name).getAbsolutePath();
         synchronized (lockObject) {
             sqLiteOpenHelper = dbMap.get(dbPath);
