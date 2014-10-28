@@ -6,6 +6,14 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * If distributing: Keep my notes that are self-promoting. Keep or improve the other notes.4
+ * If distributing (to programmers) in a way that the notes cannot be read, please include a readme file and provide
+ * a link to http://androidsqlitelibrary.com
+ * You don't have to keep the self-promotion stuff and you don't have to keep the link in a readme, but I would appreciate it.
+ * If you ever need help with this code, contact me at support@androidsqlitelibrary.com (or support@jakar.co )
+ * 
+ * Do not sell this. but use it as much as you want. There are no implied or express warranties with this code. 
+ *
  * This is a simple database manager class which makes threading/synchronization super easy.
  *
  *	Instantiate this class once in each thread that uses the database. 
