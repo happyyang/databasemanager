@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * This code hasn't been tested yet because I'm not on my machine with Android SDK installed right now. 
  * I'll verify it's working very soon..
  * 
- * If distributing: Keep my notes that are self-promoting. Keep or improve the other notes.4
+ * If distributing: Keep my notes that are self-promoting. Keep or improve the other notes.
  * If distributing (to programmers) in a way that the notes cannot be read, please include a readme file and provide
  * a link to http://androidsqlitelibrary.com
  * You don't have to keep the self-promotion stuff and you don't have to keep the link in a readme, but I would appreciate it.
@@ -27,10 +27,12 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * This is a simple database manager class which makes threading/synchronization super easy.
  *
- *	Instantiate this class once in each thread that uses the database. 
- *  <br>Make sure to call {@link #close()} on every opened instance of this class
- *  <br>If it is closed, the call {@link #open()} before using again.
- * <br><br>Call {@link #getDb()} to get an instance of the underlying SQLiteDatabse class (which is synchronized)
+ * Extend this class and use it like an SQLiteOpenHelper, but use it as follows:
+ *  Instantiate this class once in each thread that uses the database. 
+ *  Make sure to call {@link #close()} on every opened instance of this class
+ *  If it is closed, then call {@link #open()} before using again.
+ * 
+ * Call {@link #getDb()} to get an instance of the underlying SQLiteDatabse class (which is synchronized)
  *
  * I also implement this system (well, it's very similar) in my <a href="http://androidslitelibrary.com">Android SQLite Libray</a> at http://androidslitelibrary.com
  * 
@@ -39,11 +41,20 @@ import java.util.concurrent.ConcurrentHashMap;
 abstract public class DatabaseManager {
     
     //
-    abstract public void onCreate(SQLiteDatabase db) {
-    abstract public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    abstract public void onOpen(SQLiteDatabase db) {
-    abstract public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    abstract public void onConfigure(SQLiteDatabase db);
+    abstract public void onCreate(SQLiteDatabase db);
+    abstract public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
+    /**Optional.
+     * *
+     */
+    public void onOpen(SQLiteDatabase db){}
+    /**Optional.
+     * 
+     */
+    abstract public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+    /**Optional
+     * 
+     */
+    abstract public void onConfigure(SQLiteDatabase db){}
 
 
 
@@ -115,7 +126,7 @@ abstract public class DatabaseManager {
     private Context context;
 
     /** Instantiate a new DB Helper. 
-	 *<br> SQLiteOpenHelpers are statically cached so they will be reused for concurrency
+     * <br> SQLiteOpenHelpers are statically cached so they (and their internally cached SQLiteDatabases) will be reused for concurrency
      *
      * @param context Any {@link android.content.Context} belonging to your package.
      * @param name The database name. This may be anything you like. Adding a file extension is not required and any file extension you would like to use is fine.
@@ -126,16 +137,17 @@ abstract public class DatabaseManager {
         synchronized (lockObject) {
             sqLiteOpenHelper = dbMap.get(dbPath);
             if (sqLiteOpenHelper==null) {
-				//change MySQLiteOpenHelper above (for the extend) to your subclass of MySQLiteOpenHelper
                 sqLiteOpenHelper = new DBSQLiteOpenHelper(context, name, version, this);
                 dbMap.put(dbPath,sqLiteOpenHelper);
             }
-			//SQLiteOpenHelper class caches the database, so this will be the same SQLiteDatabase object
+			//SQLiteOpenHelper class caches the SQLiteDatabase, so this will be the same SQLiteDatabase object every time
             db = sqLiteOpenHelper.getWritableDatabase();
         }
         this.context = context.getApplicationContext();
     }
-	public getDb(){
+    /**Get the writable SQLiteDatabase
+     */
+	public SQLiteDatabase getDb(){
 		return db;
 	}
 
@@ -148,11 +160,10 @@ abstract public class DatabaseManager {
     }
 
 
-    /** Lowers the DB counter by 1 for any {@link SQLiteOpenHelper} objects referencing the same DB on disk
+    /** Lowers the DB counter by 1 for any {@link DatabaseManager}s referencing the same DB on disk
      *  <br />If the new counter is 0, then the database will be closed.
      *  <br /><br />This needs to be called before application exit.
-     * <br />If the counter is 0, then any further use of this object will cause crashes until another is instantiated or you call {@link #reOpen()}
-     * <br />Primarily, you would get NullPointerExceptions from other methods of this class after calling this method if the new counter is 0
+     * <br />If the counter is 0, then the underlying SQLiteDatabase is <b>null</b> until another DatabaseManager is instantiated or you call {@link #open()}
      *
      * @return true if the underlying {@link android.database.sqlite.SQLiteDatabase} is closed (counter is 0), and false otherwise (counter > 0)
      */
