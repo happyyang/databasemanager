@@ -1,6 +1,8 @@
 databasemanager
 ===============
 
+I'm working on making it so one class can handle multiple databases.
+
 A simple SQLite Database manager that handles threading/synchronization issues
 
 If you're just using this class as it currently is, just copy/paste the source into a new java file in your Andriod project
