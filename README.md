@@ -1,7 +1,7 @@
 databasemanager
 ===============
 
-I'm working on making it so one class can handle multiple databases.
+I'm still working on this.
 
 A simple SQLite Database manager that handles threading/synchronization issues
 
