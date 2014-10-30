@@ -5,17 +5,13 @@ import android.database.sqlite.SQLiteDatabase;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-package com.androidsqlitelibrary.databasehelper;
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /** Extend this class and use it as an SQLiteOpenHelper class
-* 
- * This code hasn't been tested yet because I'm not on my machine with Android SDK installed right now. 
- * I'll verify it's working very soon..
+ * 
  * 
  * If distributing: Keep my notes that are self-promoting. Keep or improve the other notes.
  * If distributing (to programmers) in a way that the notes cannot be read, please include a readme file and provide
@@ -40,8 +36,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 abstract public class DatabaseManager {
     
-    //
+    /**See SQLiteOpenHelper documentation
+    */
     abstract public void onCreate(SQLiteDatabase db);
+    /**See SQLiteOpenHelper documentation
+     */
     abstract public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
     /**Optional.
      * *
@@ -50,11 +49,11 @@ abstract public class DatabaseManager {
     /**Optional.
      * 
      */
-    abstract public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
     /**Optional
      * 
      */
-    abstract public void onConfigure(SQLiteDatabase db){}
+    public void onConfigure(SQLiteDatabase db){}
 
 
 
@@ -69,7 +68,7 @@ abstract public class DatabaseManager {
 		 
 			public DBSQLiteOpenHelper(Context context, String name, int version, DatabaseManager databaseManager) {
 				super(context, name, null, version);
-				this.databaseManager = databaseManager
+				this.databaseManager = databaseManager;
 			}
 
 			public void addConnection(){
@@ -121,7 +120,7 @@ abstract public class DatabaseManager {
     private static final Object lockObject = new Object();
 
 
-    private SQLiteOpenHelper sqLiteOpenHelper;
+    private DBSQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase db;
     private Context context;
 
