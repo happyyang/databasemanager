@@ -58,62 +58,52 @@ abstract public class DatabaseManager {
 
 
 	/** The SQLiteOpenHelper class is not actually used by your application.
-	* 
-	*/
-	static private class DBSQLiteOpenHelper extends SQLiteOpenHelper {
-	
-	    DatabaseManager databaseManager;
-		  private int counter;
-			private static final Object lockObject = new Object();
-		 
-			public DBSQLiteOpenHelper(Context context, String name, int version, DatabaseManager databaseManager) {
-				super(context, name, null, version);
-				this.databaseManager = databaseManager;
-			}
+     *
+     */
+    static private class DBSQLiteOpenHelper extends SQLiteOpenHelper {
 
-			public void addConnection(){
-				synchronized (lockObject){
-					counter++;
-				}
+        DatabaseManager databaseManager;
+        private AtomicInteger counter = new AtomicInteger(0);
 
-			}
-			public void removeConnection(){
+        public DBSQLiteOpenHelper(Context context, String name, int version, DatabaseManager databaseManager) {
+            super(context, name, null, version);
+            this.databaseManager = databaseManager;
+        }
 
-				synchronized (lockObject){
-					counter--;
-					if (counter<0)counter = 0;
-				}
-			}
-			public int getCounter() {
-				synchronized (lockObject){
-					return counter;
-				}
-			}
-			@Override
-    public void onCreate(SQLiteDatabase db) {
-        databaseManager.onCreate(db);
+        public void addConnection(){
+            counter.incrementAndGet();
+        }
+        public void removeConnection(){
+            counter.decrementAndGet();
+        }
+        public int getCounter() {
+            return counter.get();
+        }
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            databaseManager.onCreate(db);
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            databaseManager.onUpgrade(db, oldVersion, newVersion);
+        }
+
+        @Override
+        public void onOpen(SQLiteDatabase db) {
+            databaseManager.onOpen(db);
+        }
+
+        @Override
+        public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            databaseManager.onDowngrade(db, oldVersion, newVersion);
+        }
+
+        @Override
+        public void onConfigure(SQLiteDatabase db) {
+            databaseManager.onConfigure(db);
+        }
     }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        databaseManager.onUpgrade(db, oldVersion, newVersion);
-    }
-
-    @Override
-    public void onOpen(SQLiteDatabase db) {
-        databaseManager.onOpen(db);
-    }
-
-    @Override
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        databaseManager.onDowngrade(db, oldVersion, newVersion);
-    }
-
-    @Override
-    public void onConfigure(SQLiteDatabase db) {
-        databaseManager.onConfigure(db);
-    }
-	}
 
     private static final ConcurrentHashMap<String,DBSQLiteOpenHelper> dbMap = new ConcurrentHashMap<String, DBSQLiteOpenHelper>();
 
