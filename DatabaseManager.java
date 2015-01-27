@@ -28,7 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *  Make sure to call {@link #close()} on every opened instance of this class
  *  If it is closed, then call {@link #open()} before using again.
  * 
- * Call {@link #getDb()} to get an instance of the underlying SQLiteDatabse class (which is synchronized)
+ * Call {@link #open()} to get an instance of the underlying SQLiteDatabse class (which is synchronized).
+ * 
  *
  * I also implement this system (well, it's very similar) in my <a href="http://androidslitelibrary.com">Android SQLite Libray</a> at http://androidslitelibrary.com
  * 
@@ -113,6 +114,7 @@ abstract public class DatabaseManager {
     private DBSQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase db;
     private Context context;
+    private boolean isActive;
 
     /** Instantiate a new DB Helper. 
      * <br> SQLiteOpenHelpers are statically cached so they (and their internally cached SQLiteDatabases) will be reused for concurrency
@@ -133,16 +135,20 @@ abstract public class DatabaseManager {
             db = sqLiteOpenHelper.getWritableDatabase();
         }
         this.context = context.getApplicationContext();
+        this.isActive = true;
     }
-    /**Get the writable SQLiteDatabase
+    /** Alias for {@link #open()}, so see that method
+     * 
+     * @deprecated Previously just returned the SQLiteDatabase object. Now just calls (and returns) open()
      */
+     @Deprecated
 	public SQLiteDatabase getDb(){
-		return db;
+		return open();
 	}
 
     /** Check if the underlying SQLiteDatabase is open
      *
-     * @return whether the DB is open or not
+     * @return whether the DB is open or not (checks for null, to prevent crashing)
      */
     public boolean isOpen(){
         return (db!=null&&db.isOpen());
@@ -152,32 +158,39 @@ abstract public class DatabaseManager {
     /** Lowers the DB counter by 1 for any {@link DatabaseManager}s referencing the same DB on disk
      *  <br />If the new counter is 0, then the database will be closed.
      *  <br /><br />This needs to be called before application exit.
-     * <br />If the counter is 0, then the underlying SQLiteDatabase is <b>null</b> until another DatabaseManager is instantiated or you call {@link #open()}
      *
      * @return true if the underlying {@link android.database.sqlite.SQLiteDatabase} is closed (counter is 0), and false otherwise (counter > 0)
      */
     public boolean close(){
-        sqLiteOpenHelper.removeConnection();
-        if (sqLiteOpenHelper.getCounter()==0){
-            synchronized (lockObject){
+    	if (this.isActive){
+    		sqLiteOpenHelper.removeConnection();	
+    	}
+    	int count = sqliteOpenHelper.getCounter();
+    	if (count==0){
+    	    synchronized (lockObject){
                 if (db.inTransaction())db.endTransaction();
                 if (db.isOpen())db.close();
                 db = null;
             }
-            return true;
-        }
-        return false;
+    	}
+       return (count==0);
     }
-	/** Increments the internal db counter by one and opens the db if needed
+	/** Increments the internal db counter by one and opens the db if needed.
+	 * 
 	*
+	* @return db SQLiteDatabase object which is readable and writable
 	*/
 	public void open(){
-		sqLiteOpenHelper.addConnection();
+		if (!this.isActive){
+			sqLiteOpenHelper.addConnection();
+		}
 		if (db==null||!db.isOpen()){
-	            synchronized (lockObject){
-	                db = sqLiteOpenHelper.getWritableDatabase();
-	            }
-		} 
+			synchronized (lockObject){
+	          		db = sqLiteOpenHelper.getWritableDatabase();
+	        	 }
+		}
+		this.isActive = true;
+		return db;
 	}
 }
 
