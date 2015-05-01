@@ -3,6 +3,8 @@ databasemanager
 
 <b>Update!</b> There is an updated version available at https://github.com/JakarCo/databasemanager/tree/JakarCo-untested-1 but as the branch name suggests I have not tested it. I need someone else to test it and let me know if it works right and I'll commit to the master branch.
 
+For current information and future updates, see http://forum.jakar.co/databasemanager/210233/ which I will add info to as I have time.
+
 A simple SQLite Database manager that handles threading/synchronization issues
 
 If you're just using this class as it currently is, just copy/paste the source into a new java file in your Andriod project, then extend DatabaseManager (instead of SQLiteOpenHelper) for each database you want on-disk
